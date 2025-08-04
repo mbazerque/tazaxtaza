@@ -18,7 +18,7 @@ type Props = {
   cafeterias: Cafeteria[]
 }
 
-// Fix para ícono de marcador (Leaflet no lo carga por defecto en Next.js)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png',
