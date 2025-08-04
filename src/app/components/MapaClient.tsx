@@ -13,21 +13,21 @@ const cafeterias: Cafeteria[] = [
     coords: [-38.71191873649844, -62.26113853327672],
     direccion: 'Sarmiento 505 ',
     calificacion: 5,
-    imagenUrl: '/images/taza.png'
+    imagenUrl: '/images/capitanes.jpeg'
   },
   {
     nombre: 'Búlgaro',
     coords: [-38.71382852803722, -62.26163354516562],
     direccion: 'Zapiola 15',
     calificacion: 5,
-    imagenUrl: '/images/taza.png'
+    imagenUrl: '/images/bulgaro.jpg'
   },
   {
     nombre: 'Ancona Alsina',
     coords: [-38.715407488418, -62.2613211605071],
     direccion: 'Alsina 330',
     calificacion: 4,
-    imagenUrl: '/images/taza.png'
+    imagenUrl: '/images/alsina.jpg'
   },
 ]
 
