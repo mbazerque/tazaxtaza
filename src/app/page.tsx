@@ -1,10 +1,16 @@
 import MapaClient from './components/MapaClient'
+import Navbar from './components/Navbar'
 
 export default function HomePage() {
   return (
-    <main className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Taza x taza</h1>
-      <MapaClient />
-    </main>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <Navbar />
+
+      <main className="flex-1 px-5 sm:px-2 md:px-4 lg:px-0">
+        <div className="w-full">
+          <MapaClient />
+        </div>
+      </main>
+    </div>
   )
 }

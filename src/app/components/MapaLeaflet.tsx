@@ -10,6 +10,9 @@ export type Cafeteria = {
   nombre: string
   coords: [number, number]
   direccion?: string
+  horario?: string
+  infaltable?: string
+  comentario?: string
   calificacion?: number
   imagenUrl?: string
 }
@@ -38,94 +41,128 @@ export default function MapaLeaflet({ cafeterias }: Props) {
     setSelectedCafe(cafe)
   }
 
-  const closeModal = () => {
+  const closeCard = () => {
     setSelectedCafe(null)
   }
 
-  if (!isMounted) return null // Evita renderizar hasta que esté montado el mapa
+  if (!isMounted) return null
 
   return (
-    <> 
-      <MapContainer center={[-38.717566560786, -62.26548562681884]} zoom={16} style={{ height: '100vh', width: '100%' }}>
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {cafeterias.map((cafe, i) => (
-          <Marker 
-            key={i} 
-            position={cafe.coords}
-            eventHandlers={{
-              click: () => handleMarkerClick(cafe)
-            }}
-          />
-        ))}
-      </MapContainer>
-
-      {/* Modal personalizado */}
-      {selectedCafe && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center"
-          style={{ zIndex: 9999 }}
-        >
-          {/* Overlay con efecto de difuminado */}
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={closeModal}
-            style={{ zIndex: 9999 }}
-          />
-          
-          {/* Modal */}
-          <div 
-            className="relative bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden"
-            style={{ zIndex: 10000 }}
-          >
-            {/* Botón de cerrar */}
-            <button
-              onClick={closeModal}
-              className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full p-2 transition-colors"
+    <div className="flex h-[600px] rounded-lg overflow-hidden shadow-md relative">
+      {/* Menú lateral izquierdo */}
+      <div className="hidden md:block absolute top-0 left-0 z-[10000] bg-white/90 backdrop-blur-sm shadow-md h-full w-72 overflow-y-auto p-4">
+        <h3 className="font-bold text-lg mb-4 text-gray-700">Cafeterías cercanas</h3>
+        <ul className="space-y-4">
+          {cafeterias.map((cafe, index) => (
+            <li
+              key={index}
+              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
             >
-              <FaTimes className="text-gray-600" />
-            </button>
-
-            {/* Contenido del modal */}
-            <div className="w-full overflow-hidden text-left">
-              {selectedCafe.imagenUrl && (
-                <div className="w-full h-48">
-                  <img
-                    src={selectedCafe.imagenUrl}
-                    alt={`Foto de ${selectedCafe.nombre}`}
-                    className="w-full h-full object-cover"
-                  />
+              <button
+                onClick={() => handleMarkerClick(cafe)}
+                className="flex items-center w-full text-left p-3 space-x-4"
+              >
+                <img
+                  src={cafe.imagenUrl || '/placeholder.jpg'}
+                  alt={cafe.nombre}
+                  className="w-16 h-16 object-cover rounded-md"
+                />
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800">{cafe.nombre}</h4>
+                  <p className="text-sm text-gray-600">{cafe.direccion}</p>
+                  {typeof cafe.calificacion === 'number' && (
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, j) =>
+                        j < (cafe.calificacion ?? 0) ? (
+                          <FaStar key={j} className="text-yellow-500" />
+                        ) : (
+                          <FaRegStar key={j} className="text-yellow-500" />
+                        )
+                      )}
+                      <span className="ml-2 text-sm text-gray-600">
+                        ({cafe.calificacion}/5)
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-              <div className="p-6">
-                <h2 className="font-bold text-blue-600 text-xl mb-2">{selectedCafe.nombre}</h2>
+      {/* Mapa */}
+      <div className="flex-1 ml-0 md:ml-72 ">
+        <MapContainer
+          center={[-38.717566560786, -62.26548562681884]}
+          zoom={16}
+          className="h-full w-full"
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {cafeterias.map((cafe, i) => (
+            <Marker
+              key={i}
+              position={cafe.coords}
+              eventHandlers={{
+                click: () => handleMarkerClick(cafe),
+              }}
+            />
+          ))}
+        </MapContainer>
+      </div>
 
-                {selectedCafe.direccion && (
-                  <p className="text-gray-600 mb-3">{selectedCafe.direccion}</p>
-                )}
-
-                {typeof selectedCafe.calificacion === 'number' && (
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, j) =>
-                      j < (selectedCafe.calificacion ?? 0) ? (
-                        <FaStar key={j} className="text-yellow-500" />
-                      ) : (
-                        <FaRegStar key={j} className="text-yellow-500" />
-                      )
-                    )}
-                    <span className="ml-2 text-sm text-gray-600">
-                      ({selectedCafe.calificacion}/5)
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Card lateral derecha */}
+      {selectedCafe && (
+        <aside
+        className={`
+          rounded-lg w-80 bg-white shadow-xl p-5 overflow-auto fixed right-4 z-[11000]
+          top-[80px] h-[600px]
+          transition-transform duration-1000 ease-in-out
+          ${selectedCafe ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}
+        `}
+      >
+        <button
+          onClick={closeCard}
+          className="text-gray-500 hover:text-gray-900 mb-4 float-right"
+          aria-label="Cerrar card"
+        >
+          <FaTimes size={20} />
+        </button>
+      
+        {selectedCafe && (
+          <>
+            <h2 className="text-xl text-gray-500 font-semibold mb-2">{selectedCafe.nombre}</h2>
+      
+            {selectedCafe.imagenUrl && (
+              <img
+                src={selectedCafe.imagenUrl}
+                alt={`Foto de ${selectedCafe.nombre}`}
+                className="w-full h-40 object-cover rounded-md mb-4"
+              />
+            )}
+      
+            {selectedCafe.direccion && (
+              <p className="text-gray-600 mb-3">{selectedCafe.direccion}</p>
+            )}
+      
+            {selectedCafe.horario && (
+              <p className="text-gray-600 mb-3">{selectedCafe.horario}</p>
+            )}
+      
+            {selectedCafe.infaltable && (
+              <p className="text-gray-600 mb-3">{selectedCafe.infaltable}</p>
+            )}
+      
+            {selectedCafe.comentario && (
+              <p className="text-gray-600 mb-3">{selectedCafe.comentario}</p>
+            )}
+          </>
+        )}
+      </aside>
       )}
-    </>
+    </div>
   )
 }
