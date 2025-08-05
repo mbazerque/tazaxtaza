@@ -21,12 +21,15 @@ type Props = {
   cafeterias: Cafeteria[]
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-delete (L.Icon.Default.prototype as any)._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
+// Crear icono personalizado con tamaño modificado
+const customIcon = new L.Icon({
+  iconUrl: '/images/pin.png',
+  iconRetinaUrl: '/images/pin.png',
+  iconSize: [80, 80], // [ancho, alto] en píxeles
+  popupAnchor: [0, -32], // punto donde aparece el popup
   shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+  shadowSize: [41, 41],
+  shadowAnchor: [12, 41],
 })
 
 export default function MapaLeaflet({ cafeterias }: Props) {
@@ -48,10 +51,34 @@ export default function MapaLeaflet({ cafeterias }: Props) {
   if (!isMounted) return null
 
   return (
-    <div className="flex h-[600px] rounded-lg overflow-hidden shadow-md relative">
-      {/* Menú lateral izquierdo */}
+    <div className="flex flex-col md:flex-row h-auto md:h-[600px] rounded-lg overflow-hidden shadow-md relative">
+      {/* Mapa */}
+      <div className="w-full h-[400px] md:flex-1 md:h-full md:ml-72">
+        <MapContainer
+          center={[-38.717566560786, -62.26548562681884]}
+          zoom={16}
+          className="h-full w-full"
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {cafeterias.map((cafe, i) => (
+            <Marker
+              key={i}
+              position={cafe.coords}
+              icon={customIcon}
+              eventHandlers={{
+                click: () => handleMarkerClick(cafe),
+              }}
+            />
+          ))}
+        </MapContainer>
+      </div>
+
+      {/* Menú lateral izquierdo - Desktop */}
       <div className="hidden md:block absolute top-0 left-0 z-[10000] bg-white/90 backdrop-blur-sm shadow-md h-full w-72 overflow-y-auto p-4">
-        <h3 className="font-bold text-lg mb-4 text-gray-700">Cafeterías cercanas</h3>
+        <h3 className="font-bold text-lg mb-4 text-gray-700">Cafeterías</h3>
         <ul className="space-y-4">
           {cafeterias.map((cafe, index) => (
             <li
@@ -91,27 +118,46 @@ export default function MapaLeaflet({ cafeterias }: Props) {
         </ul>
       </div>
 
-      {/* Mapa */}
-      <div className="flex-1 ml-0 md:ml-72 ">
-        <MapContainer
-          center={[-38.717566560786, -62.26548562681884]}
-          zoom={16}
-          className="h-full w-full"
-        >
-          <TileLayer
-            attribution="&copy; OpenStreetMap"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {cafeterias.map((cafe, i) => (
-            <Marker
-              key={i}
-              position={cafe.coords}
-              eventHandlers={{
-                click: () => handleMarkerClick(cafe),
-              }}
-            />
+      {/* Menú inferior - Mobile */}
+      <div className="md:hidden bg-white shadow-md p-4 max-h-[400px] overflow-y-auto">
+        <h3 className="font-bold text-lg mb-4 text-gray-700">Cafeterías</h3>
+        <ul className="space-y-4">
+          {cafeterias.map((cafe, index) => (
+            <li
+              key={index}
+              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
+            >
+              <button
+                onClick={() => handleMarkerClick(cafe)}
+                className="flex items-center w-full text-left p-3 space-x-4"
+              >
+                <img
+                  src={cafe.imagenUrl || '/placeholder.jpg'}
+                  alt={cafe.nombre}
+                  className="w-16 h-16 object-cover rounded-md"
+                />
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800">{cafe.nombre}</h4>
+                  <p className="text-sm text-gray-600">{cafe.direccion}</p>
+                  {typeof cafe.calificacion === 'number' && (
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, j) =>
+                        j < (cafe.calificacion ?? 0) ? (
+                          <FaStar key={j} className="text-yellow-500" />
+                        ) : (
+                          <FaRegStar key={j} className="text-yellow-500" />
+                        )
+                      )}
+                      <span className="ml-2 text-sm text-gray-600">
+                        ({cafe.calificacion}/5)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </button>
+            </li>
           ))}
-        </MapContainer>
+        </ul>
       </div>
 
       {/* Card lateral derecha */}

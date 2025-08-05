@@ -8,7 +8,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="bg-blue-600 text-white px-4 md:px-8 py-4 shadow-md">
+    <nav className="bg-[#6F4E37] text-white px-4 md:px-8 py-4 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="text-lg md:text-xl font-semibold tracking-wide">Taza x taza</Link>
